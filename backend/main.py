@@ -8,7 +8,9 @@ app = Flask(__name__)
 CORS(app)
 
 # create database 
+load_dotenv()
 app.config["SQLALCHEMY_DATABASE_URI"] =  os.getenv("DATABASE_URI", "sqlite:///local.db") # fetch DB URI from .env file and resorts to local.db if DB URI is not in env file
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
@@ -28,6 +30,10 @@ with app.app_context():
     db.create_all()
 
 # create routes 
+@app.route("/", methods=["GET"])
+def index():
+    return jsonify({"status": "API is running"}), 200
+
 @app.route("/tasks", methods=["GET"])
 def get_tasks():
     tasks = ToDo.query.all() # fetch every row in the database
@@ -50,7 +56,11 @@ def toggle_task(task_id):
     if not task:
         return jsonify({"error" : "Task not found!"}), 404
 
-    task.completed = not task.completed
+    data = request.get_json()
+    if "completed" in data:
+        task.completed = data["completed"]
+    else:
+        task.completed = not task.completed
     db.session.commit()
     return jsonify(task.to_dict())
 
