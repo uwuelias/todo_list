@@ -19,6 +19,7 @@ class ToDo(db.Model):
     task = db.Column(db.String(120), nullable=False, unique=False)
     completed = db.Column(db.Boolean(), nullable=False, default=False)
 
+    # return python dictionary to jsonify
     def to_dict(self):
         return {
             "id" : self.id,
@@ -74,8 +75,6 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit() 
     return jsonify({"message" : "Task deleted!"})
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
